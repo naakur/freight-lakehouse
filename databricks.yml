@@ -1,0 +1,51 @@
+# =============================================================================
+# Databricks Asset Bundle (DAB): freight_lakehouse
+# One bundle -> three environments (dev, test, prod). Same code, different config.
+#
+# NOTE: there is NO workspace host in this file on purpose.
+#   Locally the CLI profile (databricks auth login) supplies it.
+#   In CI you set DATABRICKS_HOST as an environment variable.
+#   That keeps the repo portable (Free Edition now, Azure later).
+# =============================================================================
+bundle:
+  name: freight_lakehouse
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for this environment (one catalog per target)
+  stream_source:
+    description: Where the multiplexed bronze table reads from - "files" (Kafka-style JSON files) or "kafka" (Confluent)
+    default: files
+  secret_scope:
+    description: Databricks secret scope that holds the Kafka credentials (same name on Azure, backed by Key Vault)
+    default: freight-kafka
+  kafka_topics:
+    description: Comma-separated list of Kafka topics read by the multiplexed bronze table
+    default: freight.tracking.events,freight.invoice.status,freight.rate.changes,freight.claims.filed
+
+targets:
+  # ---- DEV: your sandbox. Resources get a "[dev <you>]" prefix, schedules paused.
+  dev:
+    mode: development
+    default: true
+    variables:
+      catalog: freight_dev
+
+  # ---- TEST: a clean copy used by CI to prove a change works before prod.
+  test:
+    mode: production
+    variables:
+      catalog: freight_test
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+  # ---- PROD: only deployed after test passes (approval gate comes in Step 8).
+  prod:
+    mode: production
+    variables:
+      catalog: freight_prod
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

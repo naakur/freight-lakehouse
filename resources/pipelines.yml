@@ -1,0 +1,47 @@
+# Lakeflow Spark Declarative Pipelines (SDP). One pipeline per flow so that
+# batch / streaming / gold can run on different schedules and fail independently.
+resources:
+  pipelines:
+    freight_batch_pipeline:
+      name: freight_batch_etl_${bundle.target}
+      catalog: ${var.catalog}        # default catalog
+      schema: bronze                 # default schema (our code uses full names anyway)
+      serverless: true               # Free Edition is serverless-only
+      root_path: ../src/freight_etl  # lets code do:  from utilities.dq import ...
+      libraries:
+        - glob:
+            include: ../src/freight_etl/transformations/batch/**
+      configuration:                 # read in code with spark.conf.get("freight.xxx")
+        freight.catalog: ${var.catalog}
+        freight.landing_root: /Volumes/${var.catalog}/landing/raw
+
+    # Kafka (multiplexed bronze) -> silver per topic. Triggered: processes what is available, then stops.
+    freight_stream_pipeline:
+      name: freight_stream_etl_${bundle.target}
+      catalog: ${var.catalog}
+      schema: bronze
+      serverless: true
+      root_path: ../src/freight_etl
+      libraries:
+        - glob:                                   # silver routing: identical for both sources
+            include: ../src/freight_etl/transformations/stream_silver/**
+        - glob:                                   # bronze: stream_bronze_files OR stream_bronze_kafka
+            include: ../src/freight_etl/transformations/stream_bronze_${var.stream_source}/**
+      configuration:
+        freight.catalog: ${var.catalog}
+        freight.landing_root: /Volumes/${var.catalog}/landing/raw   # needed by the file-source bronze
+        freight.secret_scope: ${var.secret_scope}
+        freight.topics: ${var.kafka_topics}
+
+    # Gold: dimensions, facts, flat summaries, audit findings. Reads silver tables built by the other two pipelines.
+    freight_gold_pipeline:
+      name: freight_gold_etl_${bundle.target}
+      catalog: ${var.catalog}
+      schema: gold
+      serverless: true
+      root_path: ../src/freight_etl
+      libraries:
+        - glob:
+            include: ../src/freight_etl/transformations/gold/**
+      configuration:
+        freight.catalog: ${var.catalog}

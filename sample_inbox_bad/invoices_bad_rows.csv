@@ -1,0 +1,7 @@
+invoice_number,carrier_id,shipment_id,invoice_date,billed_weight_lbs,billed_rate_per_lb,base_charge,fuel_surcharge_pct,fuel_amount,accessorials,accessorial_amount,total_amount,currency
+INV99000001,C001,SHP0000001,2026-08-01,100.0,0.6,60.00,0.12,7.20,,0.00,67.20,USD
+INV99000002,C001,SHP0000002,2026-08-01,100.0,0.6,60.00,0.12,7.20,,0.00,-67.20,USD
+INV99000003,C001,SHP0000003,2026-13-45,100.0,0.6,60.00,0.12,7.20,,0.00,67.20,USD
+INV99000004,C001,SHP0000004,2026-08-01,heavy,0.6,60.00,0.12,7.20,,0.00,67.20,USD
+,C002,SHP0000005,2026-08-01,100.0,0.6,60.00,0.12,7.20,,0.00,67.20,USD
+INV99000006,C001,SHP0000006,2026-08-01,100.0,0.6,60.00,0.12,7.20,,0.00,67.20,USD,oops,extra

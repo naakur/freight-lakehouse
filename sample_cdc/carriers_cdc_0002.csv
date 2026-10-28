@@ -1,0 +1,6 @@
+carrier_id,carrier_name,scac,payment_terms,op,change_ts
+C001,Atlas Freight Lines,ATLS,NET45,U,2026-04-01 09:00:00
+C003,Cardinal Express Logistics,CRDX,NET30,U,2026-05-15 10:30:00
+C005,Evergreen Transport,EVGT,NET60,U,2026-06-01 09:00:00
+C009,Iron Ridge Freight,IRDG,NET30,I,2026-06-10 11:00:00
+C008,,,,D,2026-07-01 00:00:00

@@ -1,0 +1,5 @@
+carrier_id,carrier_name,scac,payment_terms,op,change_ts
+C001,Atlas Freight Lines,ATLS,NET60,U,2026-08-01 09:00:00
+C001,Atlas Freight Lines,ATLS,NET40,U,2026-02-15 09:00:00
+C006,Frontier Cargo,FRNT,NET45,X,2026-08-05 09:00:00
+C007,Granite State Carriers,GRNS,NET30,U,

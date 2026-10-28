@@ -1,0 +1,9 @@
+carrier_id,carrier_name,scac,payment_terms,op,change_ts
+C001,Atlas Freight Lines,ATLS,NET30,I,2026-01-01 08:00:00
+C002,BlueRiver Logistics,BRVL,NET45,I,2026-01-01 08:00:00
+C003,Cardinal Express,CRDX,NET30,I,2026-01-01 08:00:00
+C004,Delta Haul Co,DLTH,NET30,I,2026-01-01 08:00:00
+C005,Evergreen Transport,EVGT,NET30,I,2026-01-01 08:00:00
+C006,Frontier Cargo,FRNT,NET45,I,2026-01-01 08:00:00
+C007,Granite State Carriers,GRNS,NET30,I,2026-01-01 08:00:00
+C008,Harbor Line Freight,HRBL,NET30,I,2026-01-01 08:00:00

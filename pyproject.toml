@@ -1,0 +1,25 @@
+[project]
+name = "freight-lakehouse"
+version = "0.1.0"
+description = "Freight audit lakehouse on Databricks (bundle deployed)"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["data", "manifests", ".databricks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]     # style errors, unused/undefined names, import order
+ignore = ["E501"]                 # long SQL strings are fine
+
+[tool.ruff.lint.per-file-ignores]
+# Notebooks and pipeline files use names Databricks injects (spark, dbutils, %run variables)
+"notebooks/*" = ["F821", "F401", "E402", "I001"]
+"src/freight_etl/transformations/**" = ["F821"]
+# tests add src/ to sys.path first, on purpose, so imports come after that line
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

@@ -1,0 +1,80 @@
+# CD: runs when a pull request is merged to main.
+#   test  : deploy -> setup -> seed sample data -> run the whole platform + all audits   (must be green)
+#   prod  : waits for a human approval (GitHub environment "production"), then deploys the SAME commit
+# Prod gets no synthetic data unless you start the workflow by hand with seed_prod = true (portfolio demo only).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      seed_prod:
+        description: "Also load the sample data into prod and run it (demo only)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: freight-deploy        # one deployment at a time
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: test
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: databricks/setup-cli@8de769ec2543ee05e456ee2121350efc7efc4bda # v1.22.1
+        with:
+          version: 0.299.2
+      - name: Generate the sample dataset
+        run: python data_generator/generate_freight_data.py --shipments 3000 --seed 42 --out data
+      - name: Validate and deploy to test
+        run: |
+          databricks bundle validate -t test
+          databricks bundle deploy -t test
+      - name: Set up the environment (idempotent)
+        run: databricks bundle run setup_environment -t test
+      - name: Seed sample data (idempotent)
+        run: scripts/seed_environment.sh freight_test data
+      - name: Run the whole platform and its audits
+        run: databricks bundle run freight_end_to_end -t test
+
+  prod:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production     # required reviewers = the approval gate
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: databricks/setup-cli@8de769ec2543ee05e456ee2121350efc7efc4bda # v1.22.1
+        with:
+          version: 0.299.2
+      - name: Validate and deploy to prod
+        run: |
+          databricks bundle validate -t prod
+          databricks bundle deploy -t prod
+      - name: Set up the environment (idempotent)
+        run: databricks bundle run setup_environment -t prod
+      - name: Demo only - seed and run prod
+        if: ${{ inputs.seed_prod }}
+        run: |
+          python data_generator/generate_freight_data.py --shipments 3000 --seed 42 --out data
+          scripts/seed_environment.sh freight_prod data
+          databricks bundle run freight_end_to_end -t prod
