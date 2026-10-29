@@ -396,7 +396,7 @@ Then run `stream_ingest` once more with no new messages: counts must not change 
 - [ ] You can explain, in one sentence each: why bronze is all strings, why we use `try_cast`, what `bronze = silver + quarantine` guarantees
 - [ ] Commit with a clear message; tag `v0.1.0`
 
-## If something fails (known uncertainties - I could not run Databricks from here)
+## If something fails (known uncertainties - I could not run Databricks from here, so run in databricks)
 | Symptom | Likely cause / fix |
 |---|---|
 | `bundle validate`: unknown field `glob` or `root_path` | Your CLI is older: update it (`databricks --version`). Fallback: list files under `libraries: - file: path:` |
@@ -416,3 +416,4 @@ anything that needs a Databricks workspace (bundle deploy, Auto Loader, pipeline
 
 ## Next steps
 4 Kafka multiplex bronze + producer -> 5 CDC/SCD2 -> 6 gold facts/dims/summaries -> 7 extended reconciliation -> 8 CI/CD -> 9 observability -> 10 Azure port.
+
